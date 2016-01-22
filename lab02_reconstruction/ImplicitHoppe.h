@@ -18,8 +18,12 @@ public:
 
     /// Evaluates implicit function at position p
     Scalar eval_implicit_at(const Vec3& p) const{
-        // TASK: compute closest point
-        // TASK: compute point-to-plane distance
-        return p.squaredNorm() - std::pow(.99,2);
+        // COmpute closest point O(log n)
+        SurfaceMesh::Vertex closest = accelerator.closest_vertex(p);
+
+        // Compute distance field w.r.t plane at the grid point
+        Vec3 normal = vnormals[closest];
+        Vec3 point = vpoints[closest];
+        return (p - point).dot(normal);
     }
 };
