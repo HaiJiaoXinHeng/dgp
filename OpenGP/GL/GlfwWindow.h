@@ -134,6 +134,11 @@ public:
 
     }
 
+    virtual void frame_buffer_size_callback(int width, int height) {
+        _width = width;
+        _height = height;
+    }
+
 
 /// @}
 
@@ -160,6 +165,10 @@ private:
 
     static void glfw_window_size_callback(GLFWwindow* window, int width, int height) {
         active_windows()->at(window)->window_size_callback(width, height);
+    }
+
+    static void glfw_frame_buffer_size_callback(GLFWwindow* window, int width, int height) {
+        active_windows()->at(window)->frame_buffer_size_callback(width, height);
     }
 
     static void glfw_scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {

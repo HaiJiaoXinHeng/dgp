@@ -30,9 +30,9 @@ public:
             scene.camera.mouse_drag_tumble(OpenGP::Vec2(xPos, yPos));
     }
 
-    void window_size_callback(int width, int height) override {
+    void frame_buffer_size_callback(int width, int height) override {
         _width = width;
-        _height = height;
+        height = height;
         scene.screen_resize(width, height);
     }
 
