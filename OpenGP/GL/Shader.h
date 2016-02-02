@@ -23,6 +23,7 @@ class ShaderProgram{
 /// @{
 private:
     GLuint pid = 0; ///< 0: invalid
+    bool _is_valid = false;
 public:
     bool verbose = false; ///< prints messages
 /// @}
@@ -32,8 +33,16 @@ public:
     GLuint programId() const { return pid; }
     void bind(){ glUseProgram(pid); } // TODO: check program valid
     void release(){ glUseProgram(0); }
+    bool is_valid(){ return _is_valid; }
     
-    void set_uniform(const char* name, const float& scalar){
+    void set_uniform(const char* name, int scalar){
+        bind(); ///< todo: rather than binding check for bound?
+            GLint loc = glGetUniformLocation(pid, name);
+            glUniform1i(loc, scalar);
+        release();
+    }
+    
+    void set_uniform(const char* name, float scalar){
         bind(); ///< todo: rather than binding check for bound?
             GLint loc = glGetUniformLocation(pid, name);
             glUniform1f(loc, scalar);
@@ -67,6 +76,15 @@ public:
         bind(); //< todo: check if bound instead
             GLint loc = glGetAttribLocation(pid, name);
             glVertexAttrib3fv(loc, vector.data());
+        release();
+    }
+    
+    void set_attribute(const char* name, ArrayBuffer<float>& buffer){
+        bind(); //< todo: check if bound instead
+            GLint location = glGetAttribLocation(pid, name); ///< property to modify
+            glEnableVertexAttribArray(location); ///< cached in VAO
+            buffer.bind(); ///< memory the description below refers to
+            glVertexAttribPointer(location, /*vec1*/ 1, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);   
         release();
     }
     
@@ -147,6 +165,7 @@ public:
             mDebug() << "Failed: " << &ProgramErrorMessage[0];
         } 
         
+        _is_valid = true;
         return Success;
     
         // TODO: should this be done?

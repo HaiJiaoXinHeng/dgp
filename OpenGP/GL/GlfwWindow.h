@@ -13,6 +13,7 @@ void glfw_error_callback(int error, const char* description){
     mFatal("ERROR%d: %s", error, description);
 }
 
+// TODO: factor out methods in GlfwWindow.cpp
 class GlfwWindow{
 /// @{
 protected:
@@ -96,10 +97,14 @@ public:
             glEnable (GL_BLEND);
             glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }
-        scene.screen_resize(width, height);
+
+        ///--- Hack (manual) for retina display
+        bool retina_display = false;
+        int f = retina_display ? 2 : 1;
+        scene.screen_resize(f*width, f*height);
     }
 
-    int run(){
+    virtual int run(){
         while(!glfwWindowShouldClose(_window)){
             scene.display();
             glfwSwapBuffers(_window);
@@ -113,33 +118,19 @@ public:
     }
     
 /// @{ TODO: add more callbacks
-    virtual void key_callback(int key, int scancode, int action, int mods){ 
+    virtual void key_callback(int key, int /*scancode*/, int action, int /*mods*/){ 
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
             glfwSetWindowShouldClose(_window, GL_TRUE);
         }
     }
-
-    virtual void mouse_press_callback(int button, int action, int mods) {
-    }
-
-    virtual void mouse_move_callback(double xPos, double yPos) {
-    }
-
-    virtual void window_size_callback(int width, int height) {
+    virtual void mouse_press_callback(int /*button*/, int /*action*/, int /*mods*/) {}
+    virtual void mouse_move_callback(double /*xPos*/, double /*yPos*/) {}
+    virtual void scroll_callback(double /*xOffset*/, double /*yOffset*/) {}    
+    virtual void window_size_callback(int width, int height){
         _width = width;
         _height = height;
+        scene.screen_resize(_width, _height);
     }
-
-    virtual void scroll_callback(double xOffset, double yOffset) {
-
-    }
-
-    virtual void frame_buffer_size_callback(int width, int height) {
-        _width = width;
-        _height = height;
-    }
-
-
 /// @}
 
 /// @{ GLFW Event dispatching
@@ -165,10 +156,6 @@ private:
 
     static void glfw_window_size_callback(GLFWwindow* window, int width, int height) {
         active_windows()->at(window)->window_size_callback(width, height);
-    }
-
-    static void glfw_frame_buffer_size_callback(GLFWwindow* window, int width, int height) {
-        active_windows()->at(window)->frame_buffer_size_callback(width, height);
     }
 
     static void glfw_scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
