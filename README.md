@@ -1,4 +1,5 @@
 # Digital Geometry Processing
+![https://travis-ci.org/ataiya/dgp.svg?branch=master](https://travis-ci.org/ataiya/dgp.svg?branch=master)
 
 ## Compile Instructions
 The class lab (ECS 354) is already fully setup for all of your lab/homeworks. You can see how to compile here:
