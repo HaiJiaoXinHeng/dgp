@@ -10,3 +10,4 @@ before_install:
   - brew install glfw3
 notifications:
   email: true
+
