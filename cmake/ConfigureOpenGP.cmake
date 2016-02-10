@@ -10,3 +10,12 @@ if(NOT TARGET OPENGP)
     file(GLOB_RECURSE HEADERS "${OpenGP_INCLUDE_DIR}/*.h")
     add_custom_target(OPENGP SOURCES ${HEADERS} ${SOURCES})
 endif()
+
+#--- On UNIX|APPLE you can do "make opengp" to update the library
+if(CMAKE_HOST_UNIX)
+    add_custom_target(opengp
+        COMMAND rm -rf OpenGP
+        COMMAND svn export https://github.com/OpenGP/OpenGP/trunk/src/OpenGP
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        COMMENT "Updating OpenGP ${PROJECT_SOURCE_DIR}/OpenGP")
+endif()

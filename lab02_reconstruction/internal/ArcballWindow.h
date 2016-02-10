@@ -30,12 +30,6 @@ public:
             scene.camera.mouse_drag_tumble(OpenGP::Vec2(xPos, yPos));
     }
 
-    void frame_buffer_size_callback(int width, int height) override {
-        _width = width;
-        height = height;
-        scene.screen_resize(width, height);
-    }
-
     void scroll_callback(double xOffset, double yOffset) override {
         scene.camera.mouse_scroll((float)yOffset);
     }
