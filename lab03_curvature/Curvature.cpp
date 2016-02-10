@@ -24,12 +24,45 @@ void Curvature::visualize_gauss_curvature() {
     using namespace OpenGP;
     /**
      *  \todo Compute cotangent weights per edge.
-     *  \li for each edge, find the incident triangle(s) (it can be a boundary edge!)
+     *  \li for each vertex, find the incident triangle(s) (it can be a boundary edge!)
      *  \li for each incident triangle, collect the three points, compute the angle
-     *  opposite of the edge, and add its cotan ot he weight of this edge.
+     *  opposite of the edge, and add its cotan to the weight of this edge.
      */
-    for (auto const& edge : mesh.edges())
-        ecotan[edge] = 1.0;
+    SurfaceMesh::Halfedge nextEdge;
+    SurfaceMesh::Vertex v0, v1;
+    Point p, p0, p1, d0, d1;
+    Scalar theta, area;
+
+    for (auto const& vertex : mesh.vertices())
+    {
+        theta = 0.0f;
+        area = 0.0f;
+
+        for (auto const& edge : mesh.halfedges(vertex))
+        {
+            nextEdge = mesh.next_halfedge(edge);
+
+            v0 = mesh.from_vertex(nextEdge);
+            v1 = mesh.to_vertex(nextEdge);
+
+            p0 = vpoint[v0];
+            p1 = vpoint[v1];
+            p = vpoint[vertex];
+
+            d0 = p0 - p;
+            d1 = p1 - p;
+            d0.normalize();
+            d1.normalize();
+
+            // Get the angle.
+            theta += std::acos(d0.dot(d1));
+
+            // Now get the area.
+            area += (1 / 6.0f) * (d0.cross(d1)).norm();
+        }
+
+        vcurvature_K[vertex] = (2 * M_PI - theta) / area;
+    }
 
     create_colours(vcurvature_K);
     gaussComputed = true;
@@ -46,8 +79,31 @@ void Curvature::visualize_mean_curvature() {
      *  \li Loop over each vertex and set its area to zero.
      *  \li Loop over each triangle and add one third of its area to each of its vertices.
      */
-    for (auto const& vertex : mesh.vertices())
-        varea[vertex] = 1.0;
+    for (auto const& vertex : mesh.vertices()) {
+        varea[vertex] = 0.0;
+    }
+
+    SurfaceMesh::Vertex_around_face_circulator vFit;
+    SurfaceMesh::Vertex v0, v1, v2;
+    Scalar a;
+
+    for (auto const& face : mesh.faces()) {
+        // Collect triangle vertices.
+        auto vFit = mesh.vertices(face);
+        v0 = *vFit;
+        ++vFit;
+        v1 = *vFit;
+        ++vFit;
+        v2 = *vFit;
+
+        // Compute one third area.
+        a = (vpoint[v1] - vpoint[v0]).cross(vpoint[v2] - vpoint[v0]).norm() / 6.0;
+
+        // Distribute area to vertices
+        varea[v0] += a;
+        varea[v1] += a;
+        varea[v2] += a;
+    }
 
     /**
      *  \todo Compute the mean meanCature for each vertex.
@@ -56,8 +112,51 @@ void Curvature::visualize_mean_curvature() {
      *  weighted by the cotan edge weight.
      *  \li Compute the mean meanCature from the Laplace vector and store it in the vertex property meanC.
      */
+    SurfaceMesh::Halfedge nextEdge;
+    Point p, p0, p1, d0, d1;
+    Scalar alpha, beta;
+    Point laplace;
+
     for (const auto& vertex : mesh.vertices()) {
-        vcurvature_H[vertex] = 0.0;
+        laplace = Point(0, 0, 0);
+
+        if (!mesh.is_boundary(vertex)) {
+            for (const auto& neighbour : mesh.halfedges(vertex)) {
+                nextEdge = mesh.next_halfedge(neighbour);
+
+                v0 = mesh.from_vertex(nextEdge);
+                v1 = mesh.to_vertex(nextEdge);
+
+                p0 = vpoint[v0];
+                p1 = vpoint[v1];
+                p = vpoint[vertex];
+
+                d0 = p - p0;
+                d1 = p1 - p0;
+
+                d0.normalize();
+                d1.normalize();
+
+                beta = std::acos(d0.dot(d1));
+
+                d0 = p - p1;
+                d1 = p0 - p1;
+
+                d0.normalize();
+                d1.normalize();
+
+                alpha = std::acos(d0.dot(d1));
+
+                Scalar cotanAlpha = 1.0f / std::tan(alpha);
+                Scalar cotanBeta = 1.0f / std::tan(beta);
+
+                laplace += (cotanAlpha + cotanBeta) * (p0 - p);
+            }
+
+            laplace /= 2.0 * varea[vertex];
+        }
+
+        vcurvature_H[vertex] = 0.5 * laplace.norm();
     }
 
     create_colours(vcurvature_H);
@@ -74,7 +173,7 @@ void Curvature::visualize_k1_curvature() {
      *  Gaussian and Mean curvatures.
      */
     for (auto const& vertex : mesh.vertices())
-        vcurvature_k1[vertex] = 1.0;
+        vcurvature_k1[vertex] = vcurvature_H[vertex] + sqrt((vcurvature_H[vertex] * vcurvature_H[vertex]) - vcurvature_K[vertex]);
 
     create_colours(vcurvature_k1);
 }
@@ -88,7 +187,7 @@ void Curvature::visualize_k2_curvature() {
      *  Gaussian and Mean curvatures.
      */
     for (auto const& vertex : mesh.vertices())
-        vcurvature_k2[vertex] = 1.0;
+        vcurvature_k2[vertex] = vcurvature_H[vertex] - sqrt((vcurvature_H[vertex] * vcurvature_H[vertex]) - vcurvature_K[vertex]);
 
     create_colours(vcurvature_k2);
 }
