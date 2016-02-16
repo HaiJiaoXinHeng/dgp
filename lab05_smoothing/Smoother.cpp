@@ -24,6 +24,11 @@ void Smoother::use_cotan_laplacian()
     std::vector<Triplet> tripletList;
     tripletList.reserve(n * n);
 
+    // TODO: Fill in the code to compute the cotan laplacian matrix.
+    // \li First, compute the cotans of the corresponding angles and the area.
+    // \li Second, store them in the appropriate entries of the matrices D and M.
+    // \li Last, multiply D * M to get the laplacian.
+
     for (auto const& v_i : mesh.vertices())
     {
         for (auto const& edge : mesh.halfedges(v_i))
@@ -47,6 +52,11 @@ void Smoother::use_graph_laplacian()
 
     std::vector<Triplet> tripletList;
     tripletList.reserve(n * n);
+
+    // TODO: Fill in the code to compute the graph laplacian matrix.
+    // \li First, set the adjacency values correspodning to each vertex in the one-ring.
+    // \li Next, compute the degree (valence) as you go along.
+    // \li Last, store the degree and adjacency entries in the matrix and generate the laplacian.
 
     for (auto const& v_i : mesh.vertices())
     {
@@ -84,6 +94,8 @@ void Smoother::smooth_explicit(OpenGP::Scalar lambda)
     P_t.transposeInPlace();
     P_t1.transposeInPlace();
 
+    // TODO: Fill in the code for explicit smoothing.
+
     i = 0;
     for (auto const& vertex : mesh.vertices())
     {
@@ -111,6 +123,8 @@ void Smoother::smooth_implicit(OpenGP::Scalar lambda)
 
     P_t.transposeInPlace();
     P_t1.transposeInPlace();
+
+    // TODO: Fill in the code for implicit smoothing.
 
     i = 0;
     for (auto const& vertex : mesh.vertices())
