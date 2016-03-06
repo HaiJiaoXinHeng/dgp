@@ -21,7 +21,7 @@ private:
 
     bool is_too_short(OpenGP::SurfaceMesh::Vertex v0, OpenGP::SurfaceMesh::Vertex v1) const
     {
-        return (points[v0] - points[v1]).norm() < 4.0f / 3.0f * target_edge_length;
+        return (points[v0] - points[v1]).norm() < 4.0f / 5.0f * target_edge_length;
     }
 
 private:
