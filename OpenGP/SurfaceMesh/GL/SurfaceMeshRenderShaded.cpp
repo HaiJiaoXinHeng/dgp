@@ -49,7 +49,8 @@ const static char* SurfaceMeshRenderShaded_fshader = R"GLSL(
         vec3 LDIR = vec3(0,0,1);
         vec3 ldir = normalize(LDIR);
         float albedo = max( dot( normalize(fnormal), ldir ), 0 );   
-        FragColor = vec4(fcolor*albedo, 1);        
+        vec3 basecolor = fcolor;
+        FragColor = vec4(basecolor*albedo, 1);        
         // FragColor = vec4(fnormal,1); ///< normal map
     }
 )GLSL";
