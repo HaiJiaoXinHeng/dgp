@@ -45,7 +45,7 @@ Box3 PointsRenderer::bounding_box(){
 void PointsRenderer::init_data(MatMxN& data){
     _data = data;
 
-    _buffer_vpos.upload(_data.data(), data.cols(), sizeof(Vec3));
+    _buffer_vpos.upload_raw(_data.data(), data.cols());
 }
 
 void PointsRenderer::set_colors(const MatMxN &M){
